@@ -1,5 +1,7 @@
 package kr.ac.mjc.blog.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import kr.ac.mjc.blog.domain.Article;
 import kr.ac.mjc.blog.dto.AddArticleRequest;
 import kr.ac.mjc.blog.dto.UpdateArticleRequest;
@@ -17,8 +19,15 @@ public class BlogController {
     private BlogService blogService;
 
     @PostMapping("/api/articles")
-    public ResponseEntity<Article> addArticle(@RequestBody AddArticleRequest request){
-        Article savedArticle=blogService.save(request);
+    public ResponseEntity<Article> addArticle(@RequestBody AddArticleRequest request,
+                                              HttpServletRequest httpServletRequest){
+        HttpSession session=httpServletRequest.getSession(true);
+        String userId= (String) session.getAttribute("userId");
+        if(userId==null){
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        Article savedArticle=blogService.save(request,userId);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(savedArticle);
     }
